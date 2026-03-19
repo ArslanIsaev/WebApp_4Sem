@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Отчёт по пользователям</h1>
+<table class="table table-bordered w-75">
+    <thead class="table-dark">
+        <tr><th>№</th><th>Пользователь</th><th>Количество посещений</th></tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+        <tr>
+            <td>{{ loop.index }}</td>
+            <td>
+                {% set full = [row['last_name'], row['first_name'], row['middle_name']]
+                              | select | join(' ') %}
+                {{ full if full else 'Неаутентифицированный пользователь' }}
+            </td>
+            <td>{{ row['cnt'] }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+<a href="{{ url_for('visits.by_users_export') }}" class="btn btn-success">
+    Экспорт в CSV
+</a>
+{% endblock %}

@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% from 'pagination.html' import render_pagination %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h3>Отзывы о курсе «{{ course.name }}»</h3>
+    <a href="{{ url_for('courses.show', course_id=course.id) }}" class="btn btn-outline-secondary">
+        ← Назад к курсу
+    </a>
+</div>
+
+<!-- Фильтр сортировки -->
+<form method="GET" class="d-flex align-items-center gap-2 mb-4">
+    <label class="form-label mb-0">Сортировка:</label>
+    <select name="sort" class="form-select w-auto">
+        <option value="new" {% if sort == 'new' %}selected{% endif %}>По новизне</option>
+        <option value="positive" {% if sort == 'positive' %}selected{% endif %}>Сначала положительные</option>
+        <option value="negative" {% if sort == 'negative' %}selected{% endif %}>Сначала отрицательные</option>
+    </select>
+    <button type="submit" class="btn btn-primary">Применить</button>
+</form>
+
+<!-- Список отзывов -->
+{% if reviews %}
+    {% for review in reviews %}
+    <div class="card mb-3">
+        <div class="card-body">
+            <div class="d-flex justify-content-between align-items-center mb-1">
+                <strong>{{ review.user.full_name }}</strong>
+                <span class="text-muted small">{{ review.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+            <div class="mb-1">
+                <span class="badge bg-primary">★ {{ review.rating }}</span>
+                <span class="ms-1">{{ rating_labels[review.rating] }}</span>
+            </div>
+            <p class="mb-0">{{ review.text }}</p>
+        </div>
+    </div>
+    {% endfor %}
+{% else %}
+    <p class="text-muted">Отзывов пока нет.</p>
+{% endif %}
+
+<!-- Пагинация (сортировка сохраняется) -->
+{{ render_pagination(pagination, 'courses.reviews', {'course_id': course.id, 'sort': sort}) }}
+
+<!-- Форма отзыва -->
+<hr class="my-4">
+<h4>Оставить отзыв</h4>
+{% if current_user.is_authenticated %}
+    {% if user_review %}
+        <div class="alert alert-info">
+            <div class="d-flex justify-content-between">
+                <strong>Ваш отзыв</strong>
+                <span class="text-muted small">{{ user_review.created_at.strftime('%d.%m.%Y') }}</span>
+            </div>
+            <div class="mb-1">
+                <span class="badge bg-primary">★ {{ user_review.rating }}</span>
+                <span class="ms-1">{{ rating_labels[user_review.rating] }}</span>
+            </div>
+            <p class="mb-0">{{ user_review.text }}</p>
+        </div>
+    {% else %}
+        {% include 'courses/_review_form.html' %}
+    {% endif %}
+{% else %}
+    <p><a href="{{ url_for('auth.login') }}">Войдите</a>, чтобы оставить отзыв.</p>
+{% endif %}
+
+{% endblock %}

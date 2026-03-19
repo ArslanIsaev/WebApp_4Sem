@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="mb-4">Журнал посещений</h1>
+
+<div class="mb-3">
+    <a href="{{ url_for('visits.by_pages') }}" class="btn btn-outline-primary">
+        Отчёт по страницам
+    </a>
+    <a href="{{ url_for('visits.by_users') }}" class="btn btn-outline-primary">
+        Отчёт по пользователям
+    </a>
+</div>
+
+<table class="table table-bordered table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>№</th>
+            <th>Пользователь</th>
+            <th>Страница</th>
+            <th>Дата</th>
+        </tr>
+    </thead>
+    <tbody>
+    {% for log in logs %}
+        <tr>
+            <td>{{ loop.index + (page - 1) * 10 }}</td>
+            <td>
+                {% if log['first_name'] %}
+                    {{ log['last_name'] or '' }}
+                    {{ log['first_name'] }}
+                    {{ log['middle_name'] or '' }}
+                {% else %}
+                    Неаутентифицированный пользователь
+                {% endif %}
+            </td>
+            <td>{{ log['path'] }}</td>
+            <td>{{ log['created_at'].strftime('%d.%m.%Y %H:%M:%S')
+                  if log['created_at'] else '' }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+
+<!-- Пагинация -->
+<nav>
+    <ul class="pagination">
+        {% for p in range(1, total_pages + 1) %}
+        <li class="page-item {% if p == page %}active{% endif %}">
+            <a class="page-link" href="{{ url_for('visits.index', page=p) }}">{{ p }}</a>
+        </li>
+        {% endfor %}
+    </ul>
+</nav>
+{% endblock %}
